@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Tra cứu xã/phường</h2>
+
+<form method="get" action="{% url 'search' %}">
+    <input type="text" name="q" value="{{ query }}" placeholder="Nhập tên xã/phường...">
+    <select name="province">
+        <option value="">-- Tất cả tỉnh/thành --</option>
+        {% for p in provinces %}
+            <option value="{{ p.id }}" {% if p.id|stringformat:"s" == selected_province %}selected{% endif %}>
+                {{ p.name }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Tìm</button>
+</form>
+
+<hr>
+
+{% if results %}
+    <ul>
+    {% for item in results %}
+        <li>
+            <strong>{{ item.direction }}</strong><br>
+            <b>{{ item.commune.name }}</b> ({{ item.commune.type }}, {{ item.commune.province.name }})
+            {% if item.direction == "Mới → Cũ" and item.merged_from %}
+                ← Sáp nhập từ: {{ item.merged_from|join:", " }}
+            {% elif item.direction != "Mới → Cũ" and item.merged_to %}
+                → Nay thuộc: {{ item.merged_to|join:", " }}
+            {% endif %}
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    {% if query %}
+        <p>Không tìm thấy kết quả nào cho "<b>{{ query }}</b>".</p>
+    {% endif %}
+{% endif %}
+
+{% endblock %}
